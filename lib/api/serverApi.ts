@@ -29,7 +29,7 @@ export const fetchNoteById = async (
 };
 
 export const getServerUser = async (cookies: string) => {
-  const { data } = await api.get("/users/current", {
+  const { data } = await api.get("/auth/me", {
     headers: { Cookie: cookies },
   });
   return data;

@@ -1,11 +1,7 @@
 import axios from "axios";
 import type { Note, NoteTag } from "@/types/note";
 import type { User } from "@/types/user";
-
-export const api = axios.create({
-  baseURL: `${process.env.NEXT_PUBLIC_API_URL}/api`,
-  withCredentials: true,
-});
+import api from "./api";
 
 export interface FetchNotesParams {
   page: number;
@@ -60,38 +56,37 @@ export interface AuthPayload {
 }
 
 export const register = async (payload: AuthPayload): Promise<User> => {
-  const { data } = await api.post<User>("/users/signup", payload);
+  const { data } = await api.post<User>("/auth/register", payload);
   return data;
 };
 
 export const login = async (payload: AuthPayload): Promise<User> => {
-  const { data } = await api.post<User>("/users/signin", payload);
+  const { data } = await api.post<User>("/auth/login", payload);
   return data;
 };
 
 export const logout = async (): Promise<void> => {
-  await api.post("/users/signout");
+  await api.post("/auth/logout");
 };
 
 export const checkSession = async (): Promise<boolean> => {
   try {
-    const { data } = await api.get("/users/me");
+    const data = await getMe();
     return !!data;
   } catch (error) {
     if (
       axios.isAxiosError(error) &&
       (error.response?.status === 401 || error.response?.status === 403)
     ) {
-      console.log("Session not valid (401/403).");
       return false;
     }
-    console.error("Unknown error during session check:", error);
+
     return false;
   }
 };
 
 export const getMe = async (): Promise<User> => {
-  const { data } = await api.get<User>("/users/me");
+  const { data } = await api.post<User>("/users/me", {});
   return data;
 };
 
