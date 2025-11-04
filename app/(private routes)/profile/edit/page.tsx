@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import Image from "next/image";
-import css from "./EditProfile.module.css";
+import css from "./EditProfilePage.module.css";
 import { useRouter } from "next/navigation";
 import { getMe, updateMe } from "@/lib/api/clientApi";
 import { useMutation } from "@tanstack/react-query";
