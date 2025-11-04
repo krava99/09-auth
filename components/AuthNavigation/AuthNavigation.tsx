@@ -1,16 +1,23 @@
 "use client";
 
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useAuth } from "@/components/AuthProvider/AuthProvider";
 import css from "./AuthNavigation.module.css";
 
 export default function AuthNavigation() {
   const { user, loading, logoutUser } = useAuth();
+  const router = useRouter();
 
   const isAuthenticated = !!user;
 
   const handleLogout = async () => {
-    await logoutUser();
+    try {
+      await logoutUser();
+      router.push("/sign-in");
+    } catch (error) {
+      console.error("Logout failed:", error);
+    }
   };
 
   if (loading) {

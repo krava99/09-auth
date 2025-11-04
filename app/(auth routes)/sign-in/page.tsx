@@ -1,13 +1,14 @@
-// app/(auth routes)/sign-in/page.tsx
 "use client";
 
 import { FormEvent, useState } from "react";
 import { useRouter } from "next/navigation";
+import { useAuth } from "@/components/AuthProvider/AuthProvider";
 import { login } from "@/lib/api/clientApi";
 import css from "./SignInPage.module.css";
 
 export default function SignInPage() {
   const router = useRouter();
+  const { loginUser } = useAuth();
   const [error, setError] = useState("");
 
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
@@ -20,7 +21,8 @@ export default function SignInPage() {
     const password = formData.get("password") as string;
 
     try {
-      await login({ email, password });
+      const user = await login({ email, password });
+      loginUser(user);
       router.push("/profile");
     } catch {
       setError("Invalid email or password.");
@@ -31,7 +33,6 @@ export default function SignInPage() {
     <main className={css.mainContent}>
       <form className={css.form} onSubmit={handleSubmit}>
         <h1 className={css.formTitle}>Sign in</h1>
-
         <div className={css.formGroup}>
           <label htmlFor="email">Email</label>
           <input
@@ -42,7 +43,6 @@ export default function SignInPage() {
             required
           />
         </div>
-
         <div className={css.formGroup}>
           <label htmlFor="password">Password</label>
           <input
@@ -53,14 +53,12 @@ export default function SignInPage() {
             required
           />
         </div>
-
         <div className={css.actions}>
           <button type="submit" className={css.submitButton}>
             Log in
           </button>
         </div>
-
-        <p className={css.error}>{error}</p>
+        {error && <p className={css.error}>{error}</p>}
       </form>
     </main>
   );

@@ -17,6 +17,9 @@ export default function PublicLayout({ children }: Props) {
     const verify = async () => {
       try {
         const isAuthenticated = await checkSession();
+
+        router.refresh();
+
         if (isAuthenticated) {
           setIsAuthenticated(true);
           router.replace("/profile");

@@ -1,8 +1,10 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
+import { refreshSession } from "@/lib/api/serverApi";
 
-export function middleware(request: NextRequest) {
-  const token = request.cookies.get("token")?.value; // 👈 заміни 'token', якщо cookie має іншу назву
+export async function middleware(request: NextRequest) {
+  const accessToken = request.cookies.get("accessToken")?.value;
+  const refreshToken = request.cookies.get("refreshToken")?.value;
   const { pathname } = request.nextUrl;
 
   const isAuthPage =
@@ -10,14 +12,38 @@ export function middleware(request: NextRequest) {
   const isPrivatePage =
     pathname.startsWith("/profile") || pathname.startsWith("/notes");
 
-  // 🔒 Якщо користувач неавторизований і хоче зайти на приватну сторінку
-  if (!token && isPrivatePage) {
+  if (!accessToken && refreshToken) {
+    try {
+      const { newAccessToken, newRefreshToken } = await refreshSession(
+        refreshToken
+      );
+
+      if (newAccessToken && newRefreshToken) {
+        const response = NextResponse.next();
+        response.cookies.set("accessToken", newAccessToken, {
+          httpOnly: true,
+          secure: true,
+          path: "/",
+        });
+        response.cookies.set("refreshToken", newRefreshToken, {
+          httpOnly: true,
+          secure: true,
+          path: "/",
+        });
+        return response;
+      }
+    } catch {
+      const loginUrl = new URL("/sign-in", request.url);
+      return NextResponse.redirect(loginUrl);
+    }
+  }
+
+  if (!accessToken && !refreshToken && isPrivatePage) {
     const loginUrl = new URL("/sign-in", request.url);
     return NextResponse.redirect(loginUrl);
   }
 
-  // 🚫 Якщо користувач авторизований і відкриває сторінку входу чи реєстрації
-  if (token && isAuthPage) {
+  if (accessToken && isAuthPage) {
     const profileUrl = new URL("/profile", request.url);
     return NextResponse.redirect(profileUrl);
   }
@@ -25,7 +51,6 @@ export function middleware(request: NextRequest) {
   return NextResponse.next();
 }
 
-// Вказуємо, які шляхи перевіряє middleware
 export const config = {
-  matcher: ["/sign-in", "/sign-up", "/profile", "/notes/:path*"],
+  matcher: ["/sign-in", "/sign-up", "/profile/:path*", "/notes/:path*"],
 };

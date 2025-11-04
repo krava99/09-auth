@@ -1,14 +1,15 @@
-// app/(auth routes)/sign-up/page.tsx
 "use client";
 
 import { FormEvent, useState } from "react";
 import { useRouter } from "next/navigation";
+import { useAuth } from "@/components/AuthProvider/AuthProvider";
 import { register } from "@/lib/api/clientApi";
 import css from "./SignUpPage.module.css";
 
 export default function SignUpPage() {
   const router = useRouter();
-  const [error, setError] = useState("");
+  const { registerUser } = useAuth();
+  const [error, setError] = useState<string>("");
 
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -20,9 +21,13 @@ export default function SignUpPage() {
     const password = formData.get("password") as string;
 
     try {
-      await register({ email, password });
+      const newUser = await register({ email, password });
+
+      registerUser(newUser);
+
       router.push("/profile");
     } catch (err) {
+      console.error(err);
       setError("Registration failed. Please try again.");
     }
   };

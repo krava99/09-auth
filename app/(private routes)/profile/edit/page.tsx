@@ -6,9 +6,11 @@ import css from "./EditProfilePage.module.css";
 import { useRouter } from "next/navigation";
 import { getMe, updateMe } from "@/lib/api/clientApi";
 import { useMutation } from "@tanstack/react-query";
+import { useAuth } from "@/components/AuthProvider/AuthProvider";
 
 export default function EditProfilePage() {
   const router = useRouter();
+  const { loginUser } = useAuth();
   const [user, setUser] = useState<{
     username: string;
     email: string;
@@ -32,7 +34,9 @@ export default function EditProfilePage() {
 
   const mutation = useMutation({
     mutationFn: (newData: { username: string }) => updateMe(newData),
-    onSuccess: () => {
+    onSuccess: (updatedUser) => {
+      loginUser(updatedUser);
+
       router.push("/profile");
     },
     onError: (err) => {

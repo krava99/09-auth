@@ -1,71 +1,37 @@
 "use client";
 
-import { createContext, useContext, useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
-import { checkSession, getMe, logout } from "@/lib/api/clientApi";
+import { createContext, useContext, useState, ReactNode } from "react";
 import type { User } from "@/types/user";
 
 interface AuthContextType {
   user: User | null;
-  loading: boolean;
-  loginUser: (user: User) => void;
+  loginUser: (userData: User) => void;
   logoutUser: () => Promise<void>;
+  registerUser: (userData: User) => void;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-export function AuthProvider({ children }: { children: React.ReactNode }) {
+interface AuthProviderProps {
+  children: ReactNode;
+}
+
+export function AuthProvider({ children }: AuthProviderProps) {
   const [user, setUser] = useState<User | null>(null);
-  const [loading, setLoading] = useState(true);
-  const router = useRouter();
 
-  useEffect(() => {
-    const verifyAuth = async () => {
-      try {
-        const isAuthenticated = await checkSession();
-
-        if (isAuthenticated) {
-          const me = await getMe();
-          setUser(me);
-        } else {
-          setUser(null);
-        }
-      } catch (error) {
-        console.error("Session check failed:", error);
-        setUser(null);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    verifyAuth();
-  }, []);
-
-  const loginUser = (userData: User) => {
-    setUser(userData);
-  };
-
-  const logoutUser = async () => {
-    try {
-      await logout();
-      setUser(null);
-      router.push("/sign-in");
-    } catch (error) {
-      console.error("Logout failed:", error);
-    }
-  };
+  const loginUser = (userData: User) => setUser(userData);
+  const registerUser = (userData: User) => setUser(userData);
+  const logoutUser = async () => setUser(null);
 
   return (
-    <AuthContext.Provider value={{ user, loading, loginUser, logoutUser }}>
-      {loading ? <>Checking session...</> : children}
+    <AuthContext.Provider value={{ user, loginUser, logoutUser, registerUser }}>
+      {children}
     </AuthContext.Provider>
   );
 }
 
-export function useAuth() {
+export const useAuth = (): AuthContextType => {
   const context = useContext(AuthContext);
-  if (!context) {
-    throw new Error("useAuth must be used within an AuthProvider");
-  }
+  if (!context) throw new Error("useAuth must be used within AuthProvider");
   return context;
-}
+};

@@ -6,5 +6,11 @@ export interface Note {
   content: string;
   tag: NoteTag;
   createdAt: string;
-  updatedAt: string;
+}
+
+export interface FetchNotesParams {
+  page: number;
+  perPage: number;
+  search?: string;
+  tag?: string;
 }
