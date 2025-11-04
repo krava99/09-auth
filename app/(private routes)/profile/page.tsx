@@ -3,9 +3,12 @@ import css from "./ProfilePage.module.css";
 import { getServerUser } from "@/lib/api/serverApi";
 import Link from "next/link";
 import { Metadata } from "next";
+import { cookies } from "next/headers";
 
 export async function generateMetadata(): Promise<Metadata> {
-  const user = await getServerUser();
+  const cookieStore = cookies();
+  const cookieString = cookieStore.toString();
+  const user = await getServerUser(cookieString);
 
   return {
     title: `${user.username} profile page`,
@@ -29,7 +32,10 @@ export async function generateMetadata(): Promise<Metadata> {
 }
 
 export default async function ProfilePage() {
-  const user = await getServerUser();
+  const cookieStore = cookies();
+  const cookieString = cookieStore.toString();
+  const user = await getServerUser(cookieString);
+
   return (
     <main className={css.mainContent}>
       <div className={css.profileCard}>
