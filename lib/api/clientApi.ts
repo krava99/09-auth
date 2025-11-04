@@ -25,7 +25,6 @@ export interface CreateNotePayload {
   tag: NoteTag;
 }
 
-// 🧠 NOTES
 export const fetchNotes = async ({
   page = 1,
   perPage = 12,
@@ -55,7 +54,6 @@ export const deleteNote = async (id: string): Promise<Note> => {
   return data;
 };
 
-// 🧠 AUTH
 export interface AuthPayload {
   email: string;
   password: string;
@@ -77,12 +75,9 @@ export const logout = async (): Promise<void> => {
 
 export const checkSession = async (): Promise<boolean> => {
   try {
-    // ЗМІНА: Викликаємо /users/me і очікуємо 200 OK
     const { data } = await api.get("/users/me");
-    // Якщо дані отримано, повертаємо true
     return !!data;
   } catch (error) {
-    // 401 Unauthorized або 403 Forbidden - означає недійсну сесію
     if (
       axios.isAxiosError(error) &&
       (error.response?.status === 401 || error.response?.status === 403)
@@ -90,8 +85,6 @@ export const checkSession = async (): Promise<boolean> => {
       console.log("Session not valid (401/403).");
       return false;
     }
-    // Якщо отримано 404 або будь-яка інша невідома помилка,
-    // вважаємо, що сесія не встановлена.
     console.error("Unknown error during session check:", error);
     return false;
   }

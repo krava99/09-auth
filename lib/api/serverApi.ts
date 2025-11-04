@@ -2,7 +2,6 @@ import api from "./api";
 import type { Note } from "@/types/note";
 import type { FetchNotesParams, FetchNotesResponse } from "./clientApi";
 
-// Отримати нотатки
 export const fetchNotes = async (
   { page = 1, perPage = 12, search, tag }: FetchNotesParams,
   cookies: string
@@ -19,7 +18,6 @@ export const fetchNotes = async (
   return data;
 };
 
-// Отримати одну нотатку
 export const fetchNoteById = async (
   id: string,
   cookies: string
@@ -30,7 +28,6 @@ export const fetchNoteById = async (
   return data;
 };
 
-// ✅ Отримати дані поточного користувача
 export const getServerUser = async (cookies: string) => {
   const { data } = await api.get("/users/current", {
     headers: { Cookie: cookies },
@@ -38,7 +35,6 @@ export const getServerUser = async (cookies: string) => {
   return data;
 };
 
-// ✅ Перевірити сесію
 export const checkSession = async (cookies: string) => {
   const { data } = await api.get("/auth/refresh", {
     headers: { Cookie: cookies },
